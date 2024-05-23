@@ -1,0 +1,66 @@
+<html>
+<head>
+  <title>Fido 2.0 webauthn demo</title>
+
+  <script type="module">
+    import {
+        create,
+        parseCreationOptionsFromJSON,
+    } from '/webauthn-json.browser-ponyfill.js';
+
+    async function start() {
+      let request = await fetch('/api/register/begin', {
+        method: 'POST',
+      });
+      let json = await request.json();
+      let options = parseCreationOptionsFromJSON(json);
+      document.getElementById('initial').style.display = 'none';
+      document.getElementById('started').style.display = 'block';
+
+      let response = await create(options);
+      let result = await fetch('/api/register/complete', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+      	body: JSON.stringify(response),
+      });
+
+      let stat = result.ok ? 'thành công' : 'thất bại';
+      alert('Đăng ký ' + stat + ', hãy tiếp tục xác thực');
+      window.location = '/';
+    }
+
+    window.start = start;
+  </script>
+
+  <style>
+    body { font-family: sans-serif; line-height: 1.5em; padding: 2em 10em; }
+    h1, h2 { color: #325F74; }
+    a { color: #ffffff; font-weight: bold; text-decoration: none;}
+    a:hover { text-decoration: underline; }
+    .btn-item{
+      padding: 5px 8px;
+      background-color: #026789;
+      border-radius: 4px;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Demo WebAuthn sử dụng thiết bị FIDO2 Fingerprint</h1>
+  <hr>
+
+  <h2>Đăng ký chứng chỉ cho người dùng</h2>
+  <div id="initial">
+    <button onclick="start();" class="btn-item">
+      <a>
+        Click để đăng ký
+      </a>
+    </button>
+  </div>
+  <div id="started", style="display: none;">
+    <p>Chạm vào thiết bị để xác nhận</p>
+    <a href="/">Hủy bỏ</a>
+  </div>
+
+</body>
+</html>
